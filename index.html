@@ -447,6 +447,10 @@
                                     <label for="provinsi-sekolah-asal" class="form-label">Provinsi Sekolah Asal</label>
                                     <input type="text" class="form-control" id="provinsi-sekolah-asal">
                                 </div>
+                                 <div class="mb-3">
+                                    <label for="tanggal-surat-asal" class="form-label">Tgl. Surat Rek. Sekolah Asal</label>
+                                    <input type="date" class="form-control" id="tanggal-surat-asal">
+                                </div>
                            </div>
                            <div class="col-md-6">
                                 <p class="fw-bold">Sekolah Tujuan</p>
@@ -469,6 +473,10 @@
                                 <div class="mb-3">
                                     <label for="provinsi-sekolah-tujuan" class="form-label">Provinsi Sekolah Tujuan</label>
                                     <input type="text" class="form-control" id="provinsi-sekolah-tujuan">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tanggal-surat-tujuan" class="form-label">Tgl. Surat Rek. Sekolah Tujuan</label>
+                                    <input type="date" class="form-control" id="tanggal-surat-tujuan">
                                 </div>
                            </div>
                         </div>
@@ -597,6 +605,27 @@
             </div>
         </div>
     </div>
+
+    <!-- Recommendation Letter Viewer Modal -->
+    <div class="modal fade" id="recommendation-viewer-modal" tabindex="-1" aria-labelledby="recommendationViewerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="recommendationViewerModalLabel">Surat Rekomendasi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="recommendation-viewer-body">
+                    <!-- PDF preview will be injected here -->
+                </div>
+                <div class="modal-footer">
+                     <a href="#" id="recommendation-download-btn" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-download me-2"></i> Download
+                    </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Loader -->
     <div class="loader-wrapper d-none" id="loader">
@@ -621,7 +650,7 @@
             // =================================================================
             // PENTING: Ganti URL ini dengan URL Web App Google Apps Script Anda
             // =================================================================
-            const GAS_URL = 'https://script.google.com/macros/s/AKfycbw4vIt4NKOuACqR-zy2YjOMRCy4qnqLizcTS8UTF8WZC-Z9IgxDGk7wqs_w_EUVwxMxOA/exec';
+            const GAS_URL = 'https://script.google.com/macros/s/AKfycbxInB5BNQ5osVIrAHQcRlPg5Ok0oIJP1TCd-lKnXTjqcuZNkIMeVbeEfilRaRwxKTYyLA/exec';
 
             // Global State
             let allData = [];
@@ -654,6 +683,7 @@
 
             const detailModal = new bootstrap.Modal(document.getElementById('detail-modal'));
             const documentViewerModal = new bootstrap.Modal(document.getElementById('document-viewer-modal'));
+            const recommendationViewerModal = new bootstrap.Modal(document.getElementById('recommendation-viewer-modal'));
             
             const fileFields = {
                 'Permohonan Orang Tua': 'permohonan',
@@ -1021,6 +1051,8 @@
                     'Kecamatan Sekolah Tujuan': document.getElementById('kecamatan-sekolah-tujuan').value,
                     'Kabupaten Sekolah Tujuan': document.getElementById('kabupaten-sekolah-tujuan').value,
                     'Provinsi Sekolah Tujuan': document.getElementById('provinsi-sekolah-tujuan').value,
+                    'Tanggal surat rekomendasi sekolah tujuan': document.getElementById('tanggal-surat-tujuan').value,
+                    'Tanggal surat rekomendasi sekolah asal': document.getElementById('tanggal-surat-asal').value,
                     'Alasan Mutasi': document.getElementById('alasan-mutasi').value,
                     'Tanggal Usulan': document.getElementById('tanggal-usulan').value,
                 };
@@ -1098,6 +1130,8 @@
                 document.getElementById('kecamatan-sekolah-tujuan').value = item['Kecamatan Sekolah Tujuan'] || '';
                 document.getElementById('kabupaten-sekolah-tujuan').value = item['Kabupaten Sekolah Tujuan'] || '';
                 document.getElementById('provinsi-sekolah-tujuan').value = item['Provinsi Sekolah Tujuan'] || '';
+                document.getElementById('tanggal-surat-tujuan').value = item['Tanggal surat rekomendasi sekolah tujuan'] ? new Date(item['Tanggal surat rekomendasi sekolah tujuan']).toISOString().split('T')[0] : '';
+                document.getElementById('tanggal-surat-asal').value = item['Tanggal surat rekomendasi sekolah asal'] ? new Date(item['Tanggal surat rekomendasi sekolah asal']).toISOString().split('T')[0] : '';
                 document.getElementById('alasan-mutasi').value = item['Alasan Mutasi'] || '';
                 
                 document.getElementById('status').value = item.Status;
@@ -1299,9 +1333,17 @@
 
                 const detailFooter = `
                     <div class="modal-footer-actions">
-                         <div>
+                         <div class="btn-group">
+                            <button type="button" class="btn btn-warning create-doc-btn" data-id="${item.ID}">
+                                <i class="fas fa-print me-1"></i> Buat Surat
+                            </button>
+                            ${item['ID Surat Rekomendasi'] ? `
+                            <button type="button" class="btn btn-primary view-recommendation-btn" data-file-id="${item['ID Surat Rekomendasi']}">
+                                <i class="fas fa-eye me-1"></i> Lihat Surat
+                            </button>
+                            ` : ''}
                             <button type="button" class="btn btn-success view-docs-btn" data-id="${item.ID}">
-                                <i class="fas fa-folder-open me-1"></i> Lihat Dokumen
+                                <i class="fas fa-folder-open me-1"></i> Dokumen Pendukung
                             </button>
                          </div>
                          <div>
@@ -1323,6 +1365,29 @@
 
                 document.querySelector('.view-docs-btn').addEventListener('click', (e) => {
                     showDocumentViewer(e.currentTarget.dataset.id);
+                });
+                
+                const viewRecommendationBtn = document.querySelector('.view-recommendation-btn');
+                if (viewRecommendationBtn) {
+                    viewRecommendationBtn.addEventListener('click', (e) => {
+                        const fileId = e.currentTarget.dataset.fileId;
+                        showRecommendationViewer(fileId);
+                    });
+                }
+
+                document.querySelector('.create-doc-btn').addEventListener('click', async (e) => {
+                    const id = e.currentTarget.dataset.id;
+                    if(confirm('Apakah Anda yakin ingin membuat surat rekomendasi untuk siswa ini?')) {
+                        const result = await gasRequest('createDocument', { id });
+                        if(result.success) {
+                            alert(`Dokumen berhasil dibuat: ${result.fileName}. Silakan cek Google Drive Anda.`);
+                            window.open(`https://drive.google.com/file/d/${result.fileId}/view`, '_blank');
+                            detailModal.hide();
+                            fetchAndRenderAllData();
+                        } else {
+                            alert(`Gagal membuat dokumen: ${result.message}`);
+                        }
+                    }
                 });
 
                 const saveVerificationBtn = document.getElementById('save-verification-btn');
@@ -1374,6 +1439,28 @@
                 }
 
                 documentViewerModal.show();
+            }
+
+            function showRecommendationViewer(fileId) {
+                if (!fileId) return;
+
+                const viewerBody = document.getElementById('recommendation-viewer-body');
+                const downloadBtn = document.getElementById('recommendation-download-btn');
+                
+                const previewImageUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+                const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+                
+                // Reset styling and add image preview
+                viewerBody.style.height = 'auto';
+                viewerBody.innerHTML = `
+                    <div class="text-center">
+                         <img src="${previewImageUrl}" alt="Pratinjau Surat Rekomendasi" class="img-fluid" style="max-height: 75vh; border: 1px solid #dee2e6; border-radius: .375rem;" 
+                              onerror="this.parentElement.innerHTML = '<div class=\\'d-flex justify-content-center align-items-center doc-preview-placeholder\\'><div class=\\'text-center\\'><i class=\\'fas fa-file-pdf fa-3x mb-2 text-danger\\'></i><p>Pratinjau gambar tidak tersedia.<br>Silakan unduh dokumen untuk melihatnya.</p></div></div>';">
+                    </div>
+                `;
+                downloadBtn.href = downloadUrl;
+
+                recommendationViewerModal.show();
             }
 
             // --- Export Functions ---
