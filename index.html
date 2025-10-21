@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Rekomendasi Mutasi Siswa</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f2f5;
+        }
+
+        /* --- Login Page --- */
+        #login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            max-width: 400px;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        /* --- Main App --- */
+        #app-container {
+            display: none; /* Initially hidden */
+        }
+        .stat-card {
+            border-left: 5px solid;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .stat-card.border-primary { border-color: #0d6efd; }
+        .stat-card.border-success { border-color: #198754; }
+        .stat-card.border-warning { border-color: #ffc107; }
+        .stat-card.border-danger { border-color: #dc3545; }
+
+        .table-hover tbody tr {
+            cursor: pointer;
+        }
+        
+        /* --- Loader --- */
+        .loader-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            backdrop-filter: blur(4px);
+        }
+        
+        /* --- Detail Modal (Tampilan Baru) --- */
+        .detail-modal-header {
+            border-bottom: 2px solid #dee2e6;
+        }
+        .detail-modal-body .info-group {
+            margin-bottom: 0.5rem; /* Mengurangi margin */
+        }
+        .detail-modal-body .info-label {
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        .detail-modal-body .info-value {
+            font-weight: 500;
+            color: #212529;
+        }
+        .detail-section-title {
+            color: #0d6efd;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 0.5rem;
+        }
+        .status-badge {
+            font-size: 1rem;
+            padding: 0.5em 0.75em;
+        }
+        .modal-footer-actions {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-upload-wrapper .file-upload-label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        .file-upload-wrapper .file-preview {
+            margin-top: 0.5rem;
+        }
+        .file-upload-wrapper .file-preview a {
+            word-break: break-all;
+        }
+
+        /* Document Viewer Modal */
+        .document-viewer-body .doc-item {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        .document-viewer-body .doc-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .document-viewer-body .doc-title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        .document-viewer-body .doc-preview img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.375rem;
+            border: 1px solid #dee2e6;
+        }
+        .document-viewer-body .doc-preview-placeholder {
+            min-height: 150px;
+            background-color: #f8f9fa;
+            border: 1px dashed #ced4da;
+            border-radius: 0.375rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #6c757d;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Login Container -->
+    <div id="login-container" class="container">
+        <div class="card shadow-lg border-0 login-card">
+            <div class="card-body">
+                <h3 class="card-title text-center mb-4">Login Aplikasi</h3>
+                <form id="login-form">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </div>
+                    <div id="login-error" class="text-danger mt-3 text-center d-none">Username atau password salah.</div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- App Container -->
+    <div id="app-container">
+        <!-- Navbar -->
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold" href="#">
+                    <i class="fas fa-school me-2"></i>
+                    Manajemen Mutasi Siswa
+                </a>
+                <div class="d-flex">
+                    <span class="navbar-text me-3 text-white">
+                        Selamat datang, <strong id="user-role">Admin</strong>
+                    </span>
+                    <button class="btn btn-danger" id="logout-btn"><i class="fas fa-sign-out-alt me-1"></i>Logout</button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="container-fluid mt-4">
+            <!-- Stat Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="card shadow-sm stat-card border-primary" data-status-filter="Semua">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title text-primary">Total Usulan</h5>
+                                <h2 class="fw-bold" id="total-usulan">0</h2>
+                            </div>
+                            <i class="fas fa-list-alt fa-3x text-primary opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card shadow-sm stat-card border-success" data-status-filter="Disetujui">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                             <div>
+                                <h5 class="card-title text-success">Disetujui</h5>
+                                <h2 class="fw-bold" id="total-disetujui">0</h2>
+                            </div>
+                            <i class="fas fa-check-circle fa-3x text-success opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card shadow-sm stat-card border-warning" data-status-filter="Pending">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                           <div>
+                                <h5 class="card-title text-warning">Pending</h5>
+                                <h2 class="fw-bold" id="total-pending">0</h2>
+                            </div>
+                            <i class="fas fa-clock fa-3x text-warning opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="card shadow-sm stat-card border-danger" data-status-filter="Ditolak">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title text-danger">Ditolak</h5>
+                                <h2 class="fw-bold" id="total-ditolak">0</h2>
+                            </div>
+                            <i class="fas fa-times-circle fa-3x text-danger opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart and Controls -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Grafik Status Usulan</h5>
+                            <div class="chart-container" style="position: relative; height:350px; width:100%">
+                                <canvas id="status-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Kontrol & Filter</h5>
+                            <div class="mb-3">
+                                <label for="search-input" class="form-label">Pencarian</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <input type="text" class="form-control" id="search-input" placeholder="Cari nama atau NISN...">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="filter-status" class="form-label">Filter berdasarkan Status</label>
+                                <select class="form-select" id="filter-status">
+                                    <option value="">Semua Status</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="Disetujui">Disetujui</option>
+                                    <option value="Ditolak">Ditolak</option>
+                                </select>
+                            </div>
+                             <div class="d-grid">
+                                <button class="btn btn-primary" id="add-new-btn"><i class="fas fa-plus-circle me-2"></i>Buat Usulan Baru</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Daftar Usulan Mutasi Siswa</h5>
+                    <div>
+                        <button class="btn btn-sm btn-outline-success" id="download-excel-btn"><i class="fas fa-file-excel me-1"></i> Unduh Excel</button>
+                        <button class="btn btn-sm btn-outline-danger" id="download-pdf-btn"><i class="fas fa-file-pdf me-1"></i> Unduh PDF</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Nama Siswa</th>
+                                    <th>NISN</th>
+                                    <th>Sekolah Asal</th>
+                                    <th>Sekolah Tujuan</th>
+                                    <th>Status</th>
+                                    <th>Tanggal Usulan</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="data-table-body">
+                                <!-- Data rows will be injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <nav id="pagination" class="d-flex justify-content-center mt-3"></nav>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Data Modal (Add/Edit) -->
+    <div class="modal fade" id="data-modal" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="data-modal-title">Form Usulan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="data-form">
+                        <input type="hidden" id="usulan-id">
+                        
+                        <!-- Data Siswa -->
+                        <h5 class="text-primary">Data Siswa</h5>
+                        <hr class="mt-0 mb-3">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nama-siswa" class="form-label">Nama Siswa</label>
+                                <input type="text" class="form-control" id="nama-siswa" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="jenjang" class="form-label">Jenjang</label>
+                                <select class="form-select" id="jenjang">
+                                    <option value="">Pilih Jenjang</option>
+                                    <option value="SD">SD</option>
+                                    <option value="SMP">SMP</option>
+                                    <option value="SMA/SMK">SMA/SMK</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="nik-siswa" class="form-label">NIK Siswa</label>
+                                <input type="text" class="form-control" id="nik-siswa">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="nis" class="form-label">NIS</label>
+                                <input type="text" class="form-control" id="nis">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="nisn" class="form-label">NISN</label>
+                                <input type="text" class="form-control" id="nisn" required>
+                            </div>
+                             <div class="col-md-4 mb-3">
+                                <label for="tempat-lahir" class="form-label">Tempat Lahir</label>
+                                <input type="text" class="form-control" id="tempat-lahir">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="tanggal-lahir" class="form-label">Tanggal Lahir</label>
+                                <input type="date" class="form-control" id="tanggal-lahir">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="jenis-kelamin" class="form-label">Jenis Kelamin</label>
+                                <select class="form-select" id="jenis-kelamin">
+                                     <option value="">Pilih Jenis Kelamin</option>
+                                     <option value="Laki-laki">Laki-laki</option>
+                                     <option value="Perempuan">Perempuan</option>
+                                </select>
+                            </div>
+                             <div class="col-md-6 mb-3">
+                                <label for="kelas" class="form-label">Kelas</label>
+                                <input type="text" class="form-control" id="kelas">
+                            </div>
+                             <div class="col-md-6 mb-3">
+                                <label for="agama" class="form-label">Agama</label>
+                                <input type="text" class="form-control" id="agama">
+                            </div>
+                        </div>
+
+                        <!-- Data Orang Tua & Alamat -->
+                        <h5 class="text-primary mt-3">Data Orang Tua & Alamat</h5>
+                        <hr class="mt-0 mb-3">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="nama-orang-tua" class="form-label">Nama Orang Tua</label>
+                                <input type="text" class="form-control" id="nama-orang-tua">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="nik-orang-tua" class="form-label">NIK Orang Tua</label>
+                                <input type="text" class="form-control" id="nik-orang-tua">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="pekerjaan-orang-tua" class="form-label">Pekerjaan Orang Tua</label>
+                                <input type="text" class="form-control" id="pekerjaan-orang-tua">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="alamat-rumah" class="form-label">Alamat Rumah</label>
+                            <textarea class="form-control" id="alamat-rumah" rows="2"></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="desa-rumah" class="form-label">Desa</label>
+                                <input type="text" class="form-control" id="desa-rumah">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="kecamatan-rumah" class="form-label">Kecamatan</label>
+                                <input type="text" class="form-control" id="kecamatan-rumah">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="kabupaten-rumah" class="form-label">Kabupaten</label>
+                                <input type="text" class="form-control" id="kabupaten-rumah">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="provinsi-rumah" class="form-label">Provinsi</label>
+                                <input type="text" class="form-control" id="provinsi-rumah">
+                            </div>
+                        </div>
+
+                        <!-- Informasi Sekolah -->
+                        <h5 class="text-primary mt-3">Informasi Sekolah</h5>
+                        <hr class="mt-0 mb-3">
+                        <div class="row">
+                           <div class="col-md-6">
+                                <p class="fw-bold">Sekolah Asal</p>
+                                <div class="mb-3">
+                                    <label for="sekolah-asal" class="form-label">Nama Sekolah Asal</label>
+                                    <input type="text" class="form-control" id="sekolah-asal" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="desa-sekolah-asal" class="form-label">Desa Sekolah Asal</label>
+                                    <input type="text" class="form-control" id="desa-sekolah-asal">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="kecamatan-sekolah-asal" class="form-label">Kecamatan Sekolah Asal</label>
+                                    <input type="text" class="form-control" id="kecamatan-sekolah-asal">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="kabupaten-sekolah-asal" class="form-label">Kabupaten Sekolah Asal</label>
+                                    <input type="text" class="form-control" id="kabupaten-sekolah-asal">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="provinsi-sekolah-asal" class="form-label">Provinsi Sekolah Asal</label>
+                                    <input type="text" class="form-control" id="provinsi-sekolah-asal">
+                                </div>
+                           </div>
+                           <div class="col-md-6">
+                                <p class="fw-bold">Sekolah Tujuan</p>
+                                <div class="mb-3">
+                                    <label for="sekolah-tujuan" class="form-label">Nama Sekolah Tujuan</label>
+                                    <input type="text" class="form-control" id="sekolah-tujuan" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="desa-sekolah-tujuan" class="form-label">Desa Sekolah Tujuan</label>
+                                    <input type="text" class="form-control" id="desa-sekolah-tujuan">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="kecamatan-sekolah-tujuan" class="form-label">Kecamatan Sekolah Tujuan</label>
+                                    <input type="text" class="form-control" id="kecamatan-sekolah-tujuan">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="kabupaten-sekolah-tujuan" class="form-label">Kabupaten Sekolah Tujuan</label>
+                                    <input type="text" class="form-control" id="kabupaten-sekolah-tujuan">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="provinsi-sekolah-tujuan" class="form-label">Provinsi Sekolah Tujuan</label>
+                                    <input type="text" class="form-control" id="provinsi-sekolah-tujuan">
+                                </div>
+                           </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="alasan-mutasi" class="form-label">Alasan Mutasi</label>
+                            <textarea class="form-control" id="alasan-mutasi" rows="3"></textarea>
+                        </div>
+
+
+                        <!-- Dokumen Pendukung -->
+                         <h5 class="text-primary mt-4">Dokumen Pendukung</h5>
+                        <hr class="mt-0">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="file-upload-wrapper">
+                                    <label for="file-permohonan" class="file-upload-label fw-bold">Permohonan Orang Tua</label>
+                                    <input type="file" class="form-control" id="file-permohonan" accept="image/*,application/pdf">
+                                    <input type="hidden" id="file-id-permohonan">
+                                    <div class="file-preview small" id="preview-permohonan"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                               <div class="file-upload-wrapper">
+                                    <label for="file-rek-terima" class="file-upload-label fw-bold">Rek. Sekolah Penerima</label>
+                                    <input type="file" class="form-control" id="file-rek-terima" accept="image/*,application/pdf">
+                                    <input type="hidden" id="file-id-rek-terima">
+                                    <div class="file-preview small" id="preview-rek-terima"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                               <div class="file-upload-wrapper">
+                                    <label for="file-rek-asal" class="file-upload-label fw-bold">Rek. Sekolah Asal</label>
+                                    <input type="file" class="form-control" id="file-rek-asal" accept="image/*,application/pdf">
+                                    <input type="hidden" id="file-id-rek-asal">
+                                    <div class="file-preview small" id="preview-rek-asal"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                               <div class="file-upload-wrapper">
+                                    <label for="file-rek-dinas" class="file-upload-label fw-bold">Rek. Dinas Pendidikan</label>
+                                    <input type="file" class="form-control" id="file-rek-dinas" accept="image/*,application/pdf">
+                                    <input type="hidden" id="file-id-rek-dinas">
+                                    <div class="file-preview small" id="preview-rek-dinas"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                               <div class="file-upload-wrapper">
+                                    <label for="file-raport" class="file-upload-label fw-bold">Raport</label>
+                                    <input type="file" class="form-control" id="file-raport" accept="image/*,application/pdf">
+                                    <input type="hidden" id="file-id-raport">
+                                    <div class="file-preview small" id="preview-raport"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                               <div class="file-upload-wrapper">
+                                    <label for="file-kk" class="file-upload-label fw-bold">Kartu Keluarga</label>
+                                    <input type="file" class="form-control" id="file-kk" accept="image/*,application/pdf">
+                                    <input type="hidden" id="file-id-kk">
+                                    <div class="file-preview small" id="preview-kk"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status dan Catatan -->
+                        <div id="status-verifikasi-section">
+                            <h5 class="text-primary mt-4">Status & Verifikasi</h5>
+                            <hr class="mt-0">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select" id="status" required>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Disetujui">Disetujui</option>
+                                        <option value="Ditolak">Ditolak</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="tanggal-usulan" class="form-label">Tanggal Usulan</label>
+                                    <input type="date" class="form-control" id="tanggal-usulan" readonly>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="catatan" class="form-label">Catatan (Opsional)</label>
+                                <textarea class="form-control" id="catatan" rows="2"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="save-data-btn">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Detail Modal -->
+    <div class="modal fade" id="detail-modal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header detail-modal-header">
+                    <h5 class="modal-title" id="detail-modal-title">Detail Usulan Mutasi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4" id="detail-modal-body">
+                    <!-- Detail content will be injected here -->
+                </div>
+                <div class="modal-footer" id="detail-modal-footer">
+                    <!-- Footer actions will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Viewer Modal -->
+    <div class="modal fade" id="document-viewer-modal" tabindex="-1" aria-labelledby="documentViewerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="documentViewerModalLabel">Dokumen Pendukung</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body document-viewer-body" id="document-viewer-body">
+                    <!-- Document items will be injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loader -->
+    <div class="loader-wrapper d-none" id="loader">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF and plugins for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <!-- SheetJS (xlsx) for Excel export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // =================================================================
+            // PENTING: Ganti URL ini dengan URL Web App Google Apps Script Anda
+            // =================================================================
+            const GAS_URL = 'https://script.google.com/macros/s/AKfycbw4vIt4NKOuACqR-zy2YjOMRCy4qnqLizcTS8UTF8WZC-Z9IgxDGk7wqs_w_EUVwxMxOA/exec';
+
+            // Global State
+            let allData = [];
+            let filteredData = [];
+            let currentPage = 1;
+            const rowsPerPage = 10;
+            let statusChart;
+            let currentUserRole = '';
+
+            // Element Selectors
+            const loginContainer = document.getElementById('login-container');
+            const appContainer = document.getElementById('app-container');
+            const loginForm = document.getElementById('login-form');
+            const loginError = document.getElementById('login-error');
+            const loader = document.getElementById('loader');
+            const logoutBtn = document.getElementById('logout-btn');
+            const userRoleDisplay = document.getElementById('user-role');
+            
+            const searchInput = document.getElementById('search-input');
+            const filterStatus = document.getElementById('filter-status');
+            const addNewBtn = document.getElementById('add-new-btn');
+            
+            const dataTableBody = document.getElementById('data-table-body');
+            const paginationEl = document.getElementById('pagination');
+
+            const dataModal = new bootstrap.Modal(document.getElementById('data-modal'));
+            const dataModalTitle = document.getElementById('data-modal-title');
+            const saveDataBtn = document.getElementById('save-data-btn');
+            const dataForm = document.getElementById('data-form');
+
+            const detailModal = new bootstrap.Modal(document.getElementById('detail-modal'));
+            const documentViewerModal = new bootstrap.Modal(document.getElementById('document-viewer-modal'));
+            
+            const fileFields = {
+                'Permohonan Orang Tua': 'permohonan',
+                'Rekomendasi Sekolah yang Menerima': 'rek-terima',
+                'Rekomendasi Sekolah Asal': 'rek-asal',
+                'Rekomendasi dari Dinas Pendidikan Kabupaten Asal': 'rek-dinas',
+                'Raport': 'raport',
+                'Kartu Keluarga': 'kk'
+            };
+
+            // --- API Communication ---
+            async function gasRequest(action, data = {}) {
+                loader.classList.remove('d-none');
+                try {
+                    const response = await fetch(GAS_URL, {
+                        method: 'POST',
+                        redirect: 'follow',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action, ...data })
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error('GAS Request Error:', error);
+                    alert('Terjadi kesalahan saat berkomunikasi dengan server.');
+                    return { success: false, error: error.message };
+                } finally {
+                    loader.classList.add('d-none');
+                }
+            }
+            
+             // --- File Upload Utility ---
+            function toBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = error => reject(error);
+                });
+            }
+
+            async function uploadFile(fileInput) {
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const fileData = await toBase64(file);
+                    const result = await gasRequest('uploadFile', {
+                        fileData: fileData,
+                        fileName: file.name,
+                        mimeType: file.type
+                    });
+                    if (result.success) {
+                        return result.fileId;
+                    } else {
+                        alert(`Gagal mengunggah file: ${file.name}. Error: ${result.message}`);
+                        return null;
+                    }
+                }
+                return null;
+            }
+
+
+            // --- Authentication ---
+            function checkLoginStatus() {
+                const loggedInUser = sessionStorage.getItem('loggedInUser');
+                if (loggedInUser) {
+                    const user = JSON.parse(loggedInUser);
+                    showApp(user.role);
+                } else {
+                    showLogin();
+                }
+            }
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                loginError.classList.add('d-none');
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const result = await gasRequest('login', { username, password });
+                if (result.success) {
+                    sessionStorage.setItem('loggedInUser', JSON.stringify({ username, role: result.role }));
+                    showApp(result.role);
+                } else {
+                    loginError.classList.remove('d-none');
+                }
+            });
+            
+            logoutBtn.addEventListener('click', () => {
+                sessionStorage.removeItem('loggedInUser');
+                showLogin();
+            });
+
+            function showApp(role) {
+                loginContainer.style.display = 'none';
+                appContainer.style.display = 'block';
+                userRoleDisplay.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+                currentUserRole = role;
+                fetchAndRenderAllData();
+            }
+            
+            function showLogin() {
+                appContainer.style.display = 'none';
+                loginContainer.style.display = 'flex';
+                loginForm.reset();
+            }
+
+            // --- Data Fetching and Rendering ---
+            async function fetchAndRenderAllData() {
+                const result = await gasRequest('getData');
+                if(result.success) {
+                    allData = result.data;
+                    applyFiltersAndRender();
+                    renderCards();
+                    renderChart();
+                }
+            }
+
+            function renderCards() {
+                const total = allData.length;
+                const disetujui = allData.filter(d => d.Status === 'Disetujui').length;
+                const pending = allData.filter(d => d.Status === 'Pending').length;
+                const ditolak = allData.filter(d => d.Status === 'Ditolak').length;
+
+                document.getElementById('total-usulan').textContent = total;
+                document.getElementById('total-disetujui').textContent = disetujui;
+                document.getElementById('total-pending').textContent = pending;
+                document.getElementById('total-ditolak').textContent = ditolak;
+            }
+            
+            function renderChart() {
+                const ctx = document.getElementById('status-chart').getContext('2d');
+                const disetujui = allData.filter(d => d.Status === 'Disetujui').length;
+                const pending = allData.filter(d => d.Status === 'Pending').length;
+                const ditolak = allData.filter(d => d.Status === 'Ditolak').length;
+                
+                const chartData = {
+                    labels: ['Disetujui', 'Pending', 'Ditolak'],
+                    datasets: [{
+                        label: 'Jumlah Usulan',
+                        data: [disetujui, pending, ditolak],
+                        backgroundColor: [
+                            'rgba(25, 135, 84, 0.7)',
+                            'rgba(255, 193, 7, 0.7)',
+                            'rgba(220, 53, 69, 0.7)'
+                        ],
+                        borderColor: [
+                             'rgba(25, 135, 84, 1)',
+                            'rgba(255, 193, 7, 1)',
+                            'rgba(220, 53, 69, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                };
+
+                if (statusChart) {
+                    statusChart.destroy();
+                }
+
+                statusChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, stepSize: 1 }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            function renderTable() {
+                dataTableBody.innerHTML = '';
+                const start = (currentPage - 1) * rowsPerPage;
+                const end = start + rowsPerPage;
+                const paginatedData = filteredData.slice(start, end);
+
+                if (paginatedData.length === 0) {
+                    dataTableBody.innerHTML = `<tr><td colspan="8" class="text-center">Tidak ada data ditemukan.</td></tr>`;
+                    return;
+                }
+                
+                paginatedData.forEach((item, index) => {
+                    const row = document.createElement('tr');
+                    row.setAttribute('data-id', item.ID);
+                    
+                    let statusBadge;
+                    switch (item.Status) {
+                        case 'Disetujui': statusBadge = 'bg-success'; break;
+                        case 'Pending': statusBadge = 'bg-warning text-dark'; break;
+                        case 'Ditolak': statusBadge = 'bg-danger'; break;
+                        default: statusBadge = 'bg-secondary';
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${start + index + 1}</td>
+                        <td>${item['Nama Siswa']}</td>
+                        <td>${item.NISN}</td>
+                        <td>${item['Nama Sekolah Asal']}</td>
+                        <td>${item['Nama Sekolah Tujuan']}</td>
+                        <td><span class="badge ${statusBadge}">${item.Status || 'N/A'}</span></td>
+                        <td>${item['Tanggal Usulan'] ? new Date(item['Tanggal Usulan']).toLocaleDateString('id-ID') : 'Invalid Date'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info text-white edit-btn" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-danger delete-btn" title="Hapus"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    dataTableBody.appendChild(row);
+                });
+            }
+
+            function renderPagination() {
+                const pageCount = Math.ceil(filteredData.length / rowsPerPage);
+                paginationEl.innerHTML = '';
+
+                if (pageCount <= 1) return;
+                
+                let paginationHTML = '<ul class="pagination">';
+                // Previous button
+                paginationHTML += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${currentPage - 1}">Sebelumnya</a></li>`;
+                
+                // Page numbers
+                for (let i = 1; i <= pageCount; i++) {
+                    paginationHTML += `<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
+                }
+
+                // Next button
+                paginationHTML += `<li class="page-item ${currentPage === pageCount ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${currentPage + 1}">Berikutnya</a></li>`;
+
+                paginationHTML += '</ul>';
+                paginationEl.innerHTML = paginationHTML;
+            }
+
+            // --- Filtering and Searching ---
+            function applyFiltersAndRender() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const statusFilter = filterStatus.value;
+                
+                filteredData = allData.filter(item => {
+                    const matchesSearch = searchTerm === '' ||
+                        (item['Nama Siswa'] && item['Nama Siswa'].toLowerCase().includes(searchTerm)) ||
+                        (item.NISN && item.NISN.toLowerCase().includes(searchTerm));
+                    const matchesStatus = statusFilter === '' || item.Status === statusFilter;
+                    
+                    return matchesSearch && matchesStatus;
+                });
+                
+                currentPage = 1;
+                renderTable();
+                renderPagination();
+            }
+            
+            searchInput.addEventListener('input', applyFiltersAndRender);
+            filterStatus.addEventListener('change', applyFiltersAndRender);
+            
+            // --- Event Delegation for table and pagination ---
+            dataTableBody.addEventListener('click', (e) => {
+                const target = e.target.closest('button');
+                const row = e.target.closest('tr');
+                const id = row?.dataset.id;
+                
+                if (!id) return;
+
+                if (target?.classList.contains('edit-btn')) {
+                    handleEdit(id);
+                } else if (target?.classList.contains('delete-btn')) {
+                    handleDelete(id);
+                } else {
+                    showDetailModal(id);
+                }
+            });
+            
+            paginationEl.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = e.target.closest('a');
+                if (target && !target.parentElement.classList.contains('disabled')) {
+                    currentPage = parseInt(target.dataset.page);
+                    renderTable();
+                    renderPagination();
+                }
+            });
+
+            // Card click listener
+            document.querySelectorAll('.stat-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const status = card.dataset.statusFilter;
+                    if(status === "Semua") {
+                        filterStatus.value = "";
+                    } else {
+                        filterStatus.value = status;
+                    }
+                    applyFiltersAndRender();
+                });
+            });
+
+
+            // --- CRUD Operations ---
+            addNewBtn.addEventListener('click', () => {
+                dataForm.reset();
+                document.getElementById('usulan-id').value = '';
+                dataModalTitle.textContent = 'Buat Usulan Baru';
+                
+                 Object.values(fileFields).forEach(suffix => {
+                    document.getElementById(`preview-${suffix}`).innerHTML = '';
+                    document.getElementById(`file-id-${suffix}`).value = '';
+                });
+                
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('tanggal-usulan').value = today;
+
+                const statusSection = document.getElementById('status-verifikasi-section');
+                if (currentUserRole === 'user') {
+                    statusSection.style.display = 'none';
+                } else {
+                    statusSection.style.display = 'block';
+                    document.getElementById('status').disabled = false;
+                    document.getElementById('catatan').readOnly = false;
+                }
+
+                dataModal.show();
+            });
+            
+            saveDataBtn.addEventListener('click', async () => {
+                if (!dataForm.checkValidity()) {
+                    dataForm.reportValidity();
+                    return;
+                }
+
+                saveDataBtn.disabled = true;
+                saveDataBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Menyimpan...`;
+                
+                const id = document.getElementById('usulan-id').value;
+
+                // Mengumpulkan semua data dari form
+                const data = {
+                    'Jenjang': document.getElementById('jenjang').value,
+                    'Nama Siswa': document.getElementById('nama-siswa').value,
+                    'NIK Siswa': document.getElementById('nik-siswa').value,
+                    'NIS': document.getElementById('nis').value,
+                    'NISN': document.getElementById('nisn').value,
+                    'Tempat lahir': document.getElementById('tempat-lahir').value,
+                    'Tanggal lahir': document.getElementById('tanggal-lahir').value,
+                    'Nama Sekolah Asal': document.getElementById('sekolah-asal').value,
+                    'Desa Sekolah Asal': document.getElementById('desa-sekolah-asal').value,
+                    'Kecamatan Sekolah Asal': document.getElementById('kecamatan-sekolah-asal').value,
+                    'Kabupaten Sekolah Asal': document.getElementById('kabupaten-sekolah-asal').value,
+                    'Provinsi Sekolah Asal': document.getElementById('provinsi-sekolah-asal').value,
+                    'Jenis Kelamin': document.getElementById('jenis-kelamin').value,
+                    'Kelas': document.getElementById('kelas').value,
+                    'Agama': document.getElementById('agama').value,
+                    'Nama Orang Tua': document.getElementById('nama-orang-tua').value,
+                    'NIK Orang Tua': document.getElementById('nik-orang-tua').value,
+                    'Pekerjaan Orang Tua': document.getElementById('pekerjaan-orang-tua').value,
+                    'Alamat Rumah': document.getElementById('alamat-rumah').value,
+                    'Desa Rumah': document.getElementById('desa-rumah').value,
+                    'Kecamatan Rumah': document.getElementById('kecamatan-rumah').value,
+                    'Kabupaten alamat rumah': document.getElementById('kabupaten-rumah').value,
+                    'Provinsi alamat rumah': document.getElementById('provinsi-rumah').value,
+                    'Nama Sekolah Tujuan': document.getElementById('sekolah-tujuan').value,
+                    'Desa Sekolah Tujuan': document.getElementById('desa-sekolah-tujuan').value,
+                    'Kecamatan Sekolah Tujuan': document.getElementById('kecamatan-sekolah-tujuan').value,
+                    'Kabupaten Sekolah Tujuan': document.getElementById('kabupaten-sekolah-tujuan').value,
+                    'Provinsi Sekolah Tujuan': document.getElementById('provinsi-sekolah-tujuan').value,
+                    'Alasan Mutasi': document.getElementById('alasan-mutasi').value,
+                    'Tanggal Usulan': document.getElementById('tanggal-usulan').value,
+                };
+
+
+                if (!id && currentUserRole === 'user') {
+                    data['Status'] = 'Pending';
+                    data['Catatan'] = '';
+                } else {
+                    data['Status'] = document.getElementById('status').value;
+                    data['Catatan'] = document.getElementById('catatan').value;
+                }
+
+                // Handle file uploads
+                for (const [columnName, suffix] of Object.entries(fileFields)) {
+                    const fileInput = document.getElementById(`file-${suffix}`);
+                    const hiddenIdInput = document.getElementById(`file-id-${suffix}`);
+                    
+                    const newFileId = await uploadFile(fileInput);
+                    data[columnName] = newFileId || hiddenIdInput.value;
+                }
+
+                const action = id ? 'update' : 'create';
+                const payload = { data };
+                 if(id) {
+                    payload.id = id;
+                 }
+
+                const result = await gasRequest(action, payload);
+                if (result.success) {
+                    dataModal.hide();
+                    fetchAndRenderAllData();
+                    alert(result.message);
+                } else {
+                     alert('Gagal menyimpan data.');
+                }
+                
+                saveDataBtn.disabled = false;
+                saveDataBtn.innerHTML = 'Simpan';
+            });
+
+            function handleEdit(id) {
+                const item = allData.find(d => String(d.ID) == id);
+                if (!item) return;
+                
+                dataForm.reset();
+                
+                // Populate form fields
+                document.getElementById('usulan-id').value = item.ID;
+                document.getElementById('jenjang').value = item['Jenjang'] || '';
+                document.getElementById('nama-siswa').value = item['Nama Siswa'] || '';
+                document.getElementById('nik-siswa').value = item['NIK Siswa'] || '';
+                document.getElementById('nis').value = item['NIS'] || '';
+                document.getElementById('nisn').value = item['NISN'] || '';
+                document.getElementById('tempat-lahir').value = item['Tempat lahir'] || '';
+                document.getElementById('tanggal-lahir').value = item['Tanggal lahir'] ? new Date(item['Tanggal lahir']).toISOString().split('T')[0] : '';
+                document.getElementById('sekolah-asal').value = item['Nama Sekolah Asal'] || '';
+                document.getElementById('desa-sekolah-asal').value = item['Desa Sekolah Asal'] || '';
+                document.getElementById('kecamatan-sekolah-asal').value = item['Kecamatan Sekolah Asal'] || '';
+                document.getElementById('kabupaten-sekolah-asal').value = item['Kabupaten Sekolah Asal'] || '';
+                document.getElementById('provinsi-sekolah-asal').value = item['Provinsi Sekolah Asal'] || '';
+                document.getElementById('jenis-kelamin').value = item['Jenis Kelamin'] || '';
+                document.getElementById('kelas').value = item['Kelas'] || '';
+                document.getElementById('agama').value = item['Agama'] || '';
+                document.getElementById('nama-orang-tua').value = item['Nama Orang Tua'] || '';
+                document.getElementById('nik-orang-tua').value = item['NIK Orang Tua'] || '';
+                document.getElementById('pekerjaan-orang-tua').value = item['Pekerjaan Orang Tua'] || '';
+                document.getElementById('alamat-rumah').value = item['Alamat Rumah'] || '';
+                document.getElementById('desa-rumah').value = item['Desa Rumah'] || '';
+                document.getElementById('kecamatan-rumah').value = item['Kecamatan Rumah'] || '';
+                document.getElementById('kabupaten-rumah').value = item['Kabupaten alamat rumah'] || '';
+                document.getElementById('provinsi-rumah').value = item['Provinsi alamat rumah'] || '';
+                document.getElementById('sekolah-tujuan').value = item['Nama Sekolah Tujuan'] || '';
+                document.getElementById('desa-sekolah-tujuan').value = item['Desa Sekolah Tujuan'] || '';
+                document.getElementById('kecamatan-sekolah-tujuan').value = item['Kecamatan Sekolah Tujuan'] || '';
+                document.getElementById('kabupaten-sekolah-tujuan').value = item['Kabupaten Sekolah Tujuan'] || '';
+                document.getElementById('provinsi-sekolah-tujuan').value = item['Provinsi Sekolah Tujuan'] || '';
+                document.getElementById('alasan-mutasi').value = item['Alasan Mutasi'] || '';
+                
+                document.getElementById('status').value = item.Status;
+                document.getElementById('tanggal-usulan').value = item['Tanggal Usulan'] ? new Date(item['Tanggal Usulan']).toISOString().split('T')[0] : '';
+                document.getElementById('catatan').value = item.Catatan || '';
+                
+                // Role-based UI
+                const statusSection = document.getElementById('status-verifikasi-section');
+                const statusSelect = document.getElementById('status');
+                const catatanTextarea = document.getElementById('catatan');
+                statusSection.style.display = 'block'; 
+
+                if (currentUserRole === 'user') {
+                    statusSelect.disabled = true;
+                    catatanTextarea.readOnly = true;
+                } else {
+                    statusSelect.disabled = false;
+                    catatanTextarea.readOnly = false;
+                }
+
+                // Populate file previews
+                for (const [columnName, suffix] of Object.entries(fileFields)) {
+                    const fileId = item[columnName];
+                    const previewEl = document.getElementById(`preview-${suffix}`);
+                    const hiddenIdInput = document.getElementById(`file-id-${suffix}`);
+                    hiddenIdInput.value = fileId || '';
+                    if (fileId) {
+                        previewEl.innerHTML = `<i class="fas fa-check-circle text-success me-1"></i> <a href="https://drive.google.com/file/d/${fileId}/view" target="_blank">Lihat file</a>`;
+                    } else {
+                        previewEl.innerHTML = '';
+                    }
+                }
+
+                dataModalTitle.textContent = 'Edit Usulan Mutasi';
+                dataModal.show();
+            }
+
+            function handleDelete(id) {
+                if (confirm('Apakah Anda yakin ingin menghapus usulan ini?')) {
+                    gasRequest('delete', { id }).then(result => {
+                        if (result.success) {
+                            fetchAndRenderAllData();
+                            alert(result.message);
+                        } else {
+                            alert('Gagal menghapus data.');
+                        }
+                    });
+                }
+            }
+
+            // --- Detail Modal & Verification ---
+            async function handleSaveVerification(e) {
+                const id = e.currentTarget.dataset.id;
+                const originalItem = allData.find(d => String(d.ID) == id);
+                if (!originalItem) return;
+
+                // Create a full data object for the update
+                const dataToUpdate = { ...originalItem }; 
+                dataToUpdate['Status'] = document.getElementById('detail-status-update').value;
+                dataToUpdate['Catatan'] = document.getElementById('detail-catatan-update').value;
+
+                const result = await gasRequest('update', { id, data: dataToUpdate });
+                if (result.success) {
+                    detailModal.hide();
+                    fetchAndRenderAllData();
+                    alert('Status berhasil diverifikasi.');
+                } else {
+                    alert('Gagal menyimpan verifikasi.');
+                }
+            }
+
+            function showDetailModal(id) {
+                const item = allData.find(d => String(d.ID) == id);
+                if (!item) {
+                     console.error("Item not found for ID:", id);
+                     alert("Data detail tidak ditemukan.");
+                     return;
+                }
+
+                let statusBadge;
+                switch (item.Status) {
+                    case 'Disetujui': statusBadge = 'bg-success'; break;
+                    case 'Pending': statusBadge = 'bg-warning text-dark'; break;
+                    case 'Ditolak': statusBadge = 'bg-danger'; break;
+                    default: statusBadge = 'bg-secondary';
+                }
+                
+                const tanggalUsulanFormatted = item['Tanggal Usulan'] 
+                    ? new Date(item['Tanggal Usulan']).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })
+                    : 'Tidak valid';
+
+                const tanggalLahirFormatted = item['Tanggal lahir'] 
+                    ? new Date(item['Tanggal lahir']).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })
+                    : 'N/A';
+                
+                const detailBody = `
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h4 class="mb-0 text-primary fw-bold">${item['Nama Siswa'] || 'Nama Tidak Tersedia'}</h4>
+                            <p class="text-muted mb-0">NISN: ${item.NISN || 'N/A'}</p>
+                        </div>
+                        <span class="badge ${statusBadge} status-badge">${item.Status || 'N/A'}</span>
+                    </div>
+
+                    <div class="row g-4">
+                        <!-- Kolom Kiri -->
+                        <div class="col-lg-6">
+                            <h6 class="detail-section-title"><i class="fas fa-user-circle me-2"></i>Informasi Siswa</h6>
+                            <div class="info-group">
+                                <div class="info-label">Tempat, Tanggal Lahir</div>
+                                <div class="info-value">${item['Tempat lahir'] || 'N/A'}, ${tanggalLahirFormatted}</div>
+                            </div>
+                             <div class="info-group">
+                                <div class="info-label">Jenis Kelamin</div>
+                                <div class="info-value">${item['Jenis Kelamin'] || 'N/A'}</div>
+                            </div>
+                            <div class="info-group">
+                                <div class="info-label">NIK / NIS</div>
+                                <div class="info-value">${item['NIK Siswa'] || 'N/A'} / ${item['NIS'] || 'N/A'}</div>
+                            </div>
+                            
+                            <h6 class="detail-section-title mt-4"><i class="fas fa-users me-2"></i>Informasi Orang Tua</h6>
+                             <div class="info-group">
+                                <div class="info-label">Nama Orang Tua</div>
+                                <div class="info-value">${item['Nama Orang Tua'] || 'N/A'}</div>
+                            </div>
+                             <div class="info-group">
+                                <div class="info-label">Pekerjaan Orang Tua</div>
+                                <div class="info-value">${item['Pekerjaan Orang Tua'] || 'N/A'}</div>
+                            </div>
+                             <div class="info-group">
+                                <div class="info-label">Alamat</div>
+                                <div class="info-value">${item['Alamat Rumah'] || 'N/A'}</div>
+                            </div>
+                        </div>
+
+                        <!-- Kolom Kanan -->
+                        <div class="col-lg-6">
+                            <h6 class="detail-section-title"><i class="fas fa-school me-2"></i>Informasi Sekolah</h6>
+                            <div class="info-group">
+                                <div class="info-label">Sekolah Asal</div>
+                                <div class="info-value fw-bold">${item['Nama Sekolah Asal'] || 'N/A'}</div>
+                            </div>
+                            <div class="info-group">
+                                <div class="info-label">Sekolah Tujuan</div>
+                                <div class="info-value fw-bold">${item['Nama Sekolah Tujuan'] || 'N/A'}</div>
+                            </div>
+                            <div class="info-group">
+                                <div class="info-label">Kelas</div>
+                                <div class="info-value">${item['Kelas'] || 'N/A'}</div>
+                            </div>
+
+                            <h6 class="detail-section-title mt-4"><i class="fas fa-file-alt me-2"></i>Detail Pengajuan</h6>
+                             <div class="info-group">
+                                <div class="info-label">Tanggal Pengajuan</div>
+                                <div class="info-value">${tanggalUsulanFormatted}</div>
+                            </div>
+                            <div class="info-group">
+                                <div class="info-label">Alasan Mutasi</div>
+                                <div class="info-value">${item['Alasan Mutasi'] || 'Tidak ada alasan'}</div>
+                            </div>
+                             ${item.Catatan ? `
+                            <div class="info-group">
+                                <div class="info-label">Catatan Verifikator</div>
+                                <div class="info-value fst-italic text-danger">"${item.Catatan}"</div>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                `;
+                
+                let adminVerificationSection = '';
+                if (currentUserRole === 'admin') {
+                    adminVerificationSection = `
+                        <hr class="my-4">
+                        <div id="verification-form" class="p-3 bg-light rounded border">
+                            <h5 class="mb-3"><i class="fas fa-check-double me-2"></i>Verifikasi Status (Admin)</h5>
+                            <div class="row align-items-end">
+                                <div class="col-md-5 mb-3 mb-md-0">
+                                    <label for="detail-status-update" class="form-label fw-bold">Ubah Status</label>
+                                    <select class="form-select" id="detail-status-update">
+                                        <option value="Pending" ${item.Status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                        <option value="Disetujui" ${item.Status === 'Disetujui' ? 'selected' : ''}>Disetujui</option>
+                                        <option value="Ditolak" ${item.Status === 'Ditolak' ? 'selected' : ''}>Ditolak</option>
+                                    </select>
+                                </div>
+                                 <div class="col-md-7 mb-3 mb-md-0">
+                                     <label for="detail-catatan-update" class="form-label fw-bold">Tambah/Ubah Catatan</label>
+                                     <textarea class="form-control" id="detail-catatan-update" rows="1">${item.Catatan || ''}</textarea>
+                                 </div>
+                            </div>
+                             <div class="text-end mt-3">
+                                <button class="btn btn-primary" id="save-verification-btn" data-id="${id}"><i class="fas fa-save me-2"></i>Simpan Verifikasi</button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('detail-modal-body').innerHTML = detailBody + adminVerificationSection;
+
+                const detailFooter = `
+                    <div class="modal-footer-actions">
+                         <div>
+                            <button type="button" class="btn btn-success view-docs-btn" data-id="${item.ID}">
+                                <i class="fas fa-folder-open me-1"></i> Lihat Dokumen
+                            </button>
+                         </div>
+                         <div>
+                            <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Tutup</button>
+                            <button type="button" class="btn btn-info text-white edit-from-detail-btn" data-id="${item.ID}">
+                                <i class="fas fa-edit me-1"></i> Edit
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('detail-modal-footer').innerHTML = detailFooter;
+
+                // Add event listeners for footer buttons
+                document.querySelector('.edit-from-detail-btn').addEventListener('click', (e) => {
+                    detailModal.hide();
+                    handleEdit(e.currentTarget.dataset.id);
+                });
+
+                document.querySelector('.view-docs-btn').addEventListener('click', (e) => {
+                    showDocumentViewer(e.currentTarget.dataset.id);
+                });
+
+                const saveVerificationBtn = document.getElementById('save-verification-btn');
+                if (saveVerificationBtn) {
+                    saveVerificationBtn.addEventListener('click', handleSaveVerification);
+                }
+                
+                detailModal.show();
+            }
+
+            function showDocumentViewer(id) {
+                const item = allData.find(d => String(d.ID) == id);
+                if (!item) return;
+
+                const viewerBody = document.getElementById('document-viewer-body');
+                viewerBody.innerHTML = ''; // Clear previous content
+
+                let hasDocuments = false;
+                for (const [columnName, suffix] of Object.entries(fileFields)) {
+                    const fileId = item[columnName];
+                    const docTitle = columnName;
+                    
+                    if (fileId) {
+                        hasDocuments = true;
+                        const viewUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+                        const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+
+                        const docItemHTML = `
+                            <div class="doc-item row">
+                                <div class="col-lg-8">
+                                    <h6 class="doc-title">${docTitle}</h6>
+                                    <div class="doc-preview">
+                                        <img src="${viewUrl}" alt="Pratinjau ${docTitle}" class="img-fluid" onerror="this.parentElement.innerHTML = '<div class=\\'doc-preview-placeholder\\'><i class=\\'fas fa-file-alt fa-2x mb-2\\'></i><p>Pratinjau tidak tersedia.<br>Ini mungkin bukan file gambar.</p></div>';">
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 d-flex align-items-center justify-content-center mt-3 mt-lg-0">
+                                     <a href="${downloadUrl}" class="btn btn-lg btn-primary" target="_blank" rel="noopener noreferrer">
+                                        <i class="fas fa-download me-2"></i> Download
+                                     </a>
+                                </div>
+                            </div>
+                        `;
+                        viewerBody.innerHTML += docItemHTML;
+                    }
+                }
+
+                if (!hasDocuments) {
+                    viewerBody.innerHTML = `<div class="text-center p-5"><i class="fas fa-file-excel fa-3x text-muted mb-3"></i><p>Tidak ada dokumen pendukung yang diunggah untuk usulan ini.</p></div>`;
+                }
+
+                documentViewerModal.show();
+            }
+
+            // --- Export Functions ---
+            function downloadExcel() {
+                if (filteredData.length === 0) {
+                    alert('Tidak ada data untuk diunduh.');
+                    return;
+                }
+                const worksheet = XLSX.utils.json_to_sheet(filteredData);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Data Usulan');
+                XLSX.writeFile(workbook, 'Daftar_Usulan_Mutasi.xlsx');
+            }
+
+            function downloadPDF() {
+                if (filteredData.length === 0) {
+                    alert('Tidak ada data untuk diunduh.');
+                    return;
+                }
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.autoTable({
+                    head: [['#', 'Nama Siswa', 'NISN', 'Sekolah Asal', 'Sekolah Tujuan', 'Status', 'Tanggal Usulan']],
+                    body: filteredData.map((item, index) => [
+                        index + 1,
+                        item['Nama Siswa'],
+                        item.NISN,
+                        item['Nama Sekolah Asal'],
+                        item['Nama Sekolah Tujuan'],
+                        item.Status,
+                        item['Tanggal Usulan'] ? new Date(item['Tanggal Usulan']).toLocaleDateString('id-ID') : 'N/A'
+                    ]),
+                });
+
+                doc.save('Daftar_Usulan_Mutasi.pdf');
+            }
+
+            document.getElementById('download-excel-btn').addEventListener('click', downloadExcel);
+            document.getElementById('download-pdf-btn').addEventListener('click', downloadPDF);
+
+
+            // --- Initial Load ---
+            checkLoginStatus();
+        });
+    </script>
+</body>
+</html>
+
