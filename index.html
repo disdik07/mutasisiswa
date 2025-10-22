@@ -284,6 +284,7 @@
                 <div class="card-header bg-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Daftar Usulan Mutasi Siswa</h5>
                     <div>
+                        <button class="btn btn-sm btn-outline-primary" id="refresh-btn"><i class="fas fa-sync-alt me-1"></i> Refresh</button>
                         <button class="btn btn-sm btn-outline-success" id="download-excel-btn"><i class="fas fa-file-excel me-1"></i> Unduh Excel</button>
                         <button class="btn btn-sm btn-outline-danger" id="download-pdf-btn"><i class="fas fa-file-pdf me-1"></i> Unduh PDF</button>
                     </div>
@@ -650,7 +651,7 @@
             // =================================================================
             // PENTING: Ganti URL ini dengan URL Web App Google Apps Script Anda
             // =================================================================
-            const GAS_URL = 'https://script.google.com/macros/s/AKfycbz1H9BKAfxyP9w2RoymcGckuM286LrmJOGNn1SCdXgeuc74oZhnnRj839Sygr2DvqKi5A/exec';
+            const GAS_URL = 'https://script.google.com/macros/s/AKfycbx7fnBQu3mjAXIn6-bW4Fw922N8JEqD9MnhXy4NFcsGeMvTQMMsdHF3Xl74HXgdzMqk6Q/exec';
 
             // Global State
             let allData = [];
@@ -910,9 +911,32 @@
                 paginationHTML += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${currentPage - 1}">Sebelumnya</a></li>`;
                 
                 // Page numbers
-                for (let i = 1; i <= pageCount; i++) {
+                const maxPagesToShow = 5;
+                let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+                let endPage = Math.min(pageCount, startPage + maxPagesToShow - 1);
+
+                if (endPage - startPage + 1 < maxPagesToShow) {
+                    startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                }
+
+                if (startPage > 1) {
+                    paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`;
+                    if (startPage > 2) {
+                        paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                    }
+                }
+
+                for (let i = startPage; i <= endPage; i++) {
                     paginationHTML += `<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`;
                 }
+
+                if (endPage < pageCount) {
+                    if (endPage < pageCount - 1) {
+                        paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                    }
+                    paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${pageCount}">${pageCount}</a></li>`;
+                }
+
 
                 // Next button
                 paginationHTML += `<li class="page-item ${currentPage === pageCount ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${currentPage + 1}">Berikutnya</a></li>`;
@@ -1501,6 +1525,16 @@
 
             document.getElementById('download-excel-btn').addEventListener('click', downloadExcel);
             document.getElementById('download-pdf-btn').addEventListener('click', downloadPDF);
+            
+            document.getElementById('refresh-btn').addEventListener('click', () => {
+                const icon = document.querySelector('#refresh-btn i');
+                icon.classList.add('fa-spin');
+                document.getElementById('refresh-btn').disabled = true;
+                fetchAndRenderAllData().finally(() => {
+                    icon.classList.remove('fa-spin');
+                    document.getElementById('refresh-btn').disabled = false;
+                });
+            });
 
 
             // --- Initial Load ---
