@@ -182,7 +182,7 @@
                 </a>
                 <div class="d-flex">
                     <span class="navbar-text me-3 text-white">
-                        Selamat datang, <strong id="user-role">Admin</strong>
+                        Selamat datang, <strong id="user-role-display">Admin</strong>
                     </span>
                     <button class="btn btn-danger" id="logout-btn"><i class="fas fa-sign-out-alt me-1"></i>Logout</button>
                 </div>
@@ -259,7 +259,7 @@
                                 <label for="search-input" class="form-label">Pencarian</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                    <input type="text" class="form-control" id="search-input" placeholder="Cari nama atau NISN...">
+                                    <input type="text" class="form-control" id="search-input" placeholder="Cari nama, nisn, sekolah...">
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -481,6 +481,33 @@
                                 </div>
                            </div>
                         </div>
+
+                        <!-- Kolom Tambahan untuk Surat Rekomendasi -->
+                        <h5 class="text-primary mt-3">Detail Surat Rekomendasi</h5>
+                        <hr class="mt-0 mb-3">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="nomor-surat-asal" class="form-label">Nomor Surat Rekomendasi Sekolah Asal</label>
+                                <input type="text" class="form-control" id="nomor-surat-asal">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="nomor-surat-tujuan" class="form-label">Nomor Surat Rekomendasi Sekolah Tujuan</label>
+                                <input type="text" class="form-control" id="nomor-surat-tujuan">
+                            </div>
+                             <div class="col-md-4 mb-3">
+                                <label for="bulan-surat-mutasi" class="form-label">Bulan Surat Mutasi (Text)</label>
+                                <input type="text" class="form-control" id="bulan-surat-mutasi" placeholder="Contoh: Juli">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="bulan-romawi" class="form-label">Bulan Romawi</label>
+                                <input type="text" class="form-control" id="bulan-romawi" placeholder="Contoh: VII">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="tahun-surat-mutasi" class="form-label">Tahun Surat Mutasi</label>
+                                <input type="text" class="form-control" id="tahun-surat-mutasi" placeholder="Contoh: 2024">
+                            </div>
+                        </div>
+                        
                         <div class="mb-3">
                             <label for="alasan-mutasi" class="form-label">Alasan Mutasi</label>
                             <textarea class="form-control" id="alasan-mutasi" rows="3"></textarea>
@@ -493,7 +520,7 @@
                         <div class="row">
                             <div class="col-md-4 mb-3">
                                 <div class="file-upload-wrapper">
-                                    <label for="file-permohonan" class="file-upload-label fw-bold">Permohonan Orang Tua</label>
+                                    <label for="file-permohonan" class="form-label fw-bold">Permohonan Orang Tua</label>
                                     <input type="file" class="form-control" id="file-permohonan" accept="image/*,application/pdf">
                                     <input type="hidden" id="file-id-permohonan">
                                     <div class="file-preview small" id="preview-permohonan"></div>
@@ -501,7 +528,7 @@
                             </div>
                             <div class="col-md-4 mb-3">
                                <div class="file-upload-wrapper">
-                                    <label for="file-rek-terima" class="file-upload-label fw-bold">Rek. Sekolah Penerima</label>
+                                    <label for="file-rek-terima" class="form-label fw-bold">Rek. Sekolah Penerima</label>
                                     <input type="file" class="form-control" id="file-rek-terima" accept="image/*,application/pdf">
                                     <input type="hidden" id="file-id-rek-terima">
                                     <div class="file-preview small" id="preview-rek-terima"></div>
@@ -509,7 +536,7 @@
                             </div>
                             <div class="col-md-4 mb-3">
                                <div class="file-upload-wrapper">
-                                    <label for="file-rek-asal" class="file-upload-label fw-bold">Rek. Sekolah Asal</label>
+                                    <label for="file-rek-asal" class="form-label fw-bold">Rek. Sekolah Asal</label>
                                     <input type="file" class="form-control" id="file-rek-asal" accept="image/*,application/pdf">
                                     <input type="hidden" id="file-id-rek-asal">
                                     <div class="file-preview small" id="preview-rek-asal"></div>
@@ -517,7 +544,7 @@
                             </div>
                             <div class="col-md-4 mb-3">
                                <div class="file-upload-wrapper">
-                                    <label for="file-rek-dinas" class="file-upload-label fw-bold">Rek. Dinas Pendidikan</label>
+                                    <label for="file-rek-dinas" class="form-label fw-bold">Rek. Dinas Pendidikan</label>
                                     <input type="file" class="form-control" id="file-rek-dinas" accept="image/*,application/pdf">
                                     <input type="hidden" id="file-id-rek-dinas">
                                     <div class="file-preview small" id="preview-rek-dinas"></div>
@@ -525,7 +552,7 @@
                             </div>
                             <div class="col-md-4 mb-3">
                                <div class="file-upload-wrapper">
-                                    <label for="file-raport" class="file-upload-label fw-bold">Raport</label>
+                                    <label for="file-raport" class="form-label fw-bold">Raport</label>
                                     <input type="file" class="form-control" id="file-raport" accept="image/*,application/pdf">
                                     <input type="hidden" id="file-id-raport">
                                     <div class="file-preview small" id="preview-raport"></div>
@@ -533,7 +560,7 @@
                             </div>
                             <div class="col-md-4 mb-3">
                                <div class="file-upload-wrapper">
-                                    <label for="file-kk" class="file-upload-label fw-bold">Kartu Keluarga</label>
+                                    <label for="file-kk" class="form-label fw-bold">Kartu Keluarga</label>
                                     <input type="file" class="form-control" id="file-kk" accept="image/*,application/pdf">
                                     <input type="hidden" id="file-id-kk">
                                     <div class="file-preview small" id="preview-kk"></div>
@@ -651,7 +678,7 @@
             // =================================================================
             // PENTING: Ganti URL ini dengan URL Web App Google Apps Script Anda
             // =================================================================
-            const GAS_URL = 'https://script.google.com/macros/s/AKfycbx7fnBQu3mjAXIn6-bW4Fw922N8JEqD9MnhXy4NFcsGeMvTQMMsdHF3Xl74HXgdzMqk6Q/exec';
+            const GAS_URL = 'https://script.google.com/macros/s/AKfycbw9uPNxeL9sy-OsHgq5WkeCHnl9eMgDnc9MAYkSigQmF5WnnHi_NDCm6YRF8CKzBwI2fg/exec';
 
             // Global State
             let allData = [];
@@ -660,6 +687,7 @@
             const rowsPerPage = 10;
             let statusChart;
             let currentUserRole = '';
+            let currentUsername = '';
 
             // Element Selectors
             const loginContainer = document.getElementById('login-container');
@@ -668,7 +696,7 @@
             const loginError = document.getElementById('login-error');
             const loader = document.getElementById('loader');
             const logoutBtn = document.getElementById('logout-btn');
-            const userRoleDisplay = document.getElementById('user-role');
+            const userRoleDisplay = document.getElementById('user-role-display'); // Mengganti ID
             
             const searchInput = document.getElementById('search-input');
             const filterStatus = document.getElementById('filter-status');
@@ -695,15 +723,28 @@
                 'Kartu Keluarga': 'kk'
             };
 
-            // --- API Communication ---
+            // --- API Communication (FIXED) ---
             async function gasRequest(action, data = {}) {
                 loader.classList.remove('d-none');
                 try {
+                    const user = JSON.parse(sessionStorage.getItem('loggedInUser'));
+                    const payload = { 
+                        action,
+                        username: user ? user.username : null,
+                        role: user ? user.role : null,
+                        ...data 
+                    };
+                    
+                    // Panggilan login ditangani secara terpisah di event listener
+                    if (action === 'login') {
+                        throw new Error("gasRequest tidak boleh dipanggil untuk login. Gunakan panggilan fetch terpisah.");
+                    }
+
                     const response = await fetch(GAS_URL, {
                         method: 'POST',
                         redirect: 'follow',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ action, ...data })
+                        body: JSON.stringify(payload)
                     });
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
@@ -748,12 +789,14 @@
             }
 
 
-            // --- Authentication ---
+            // --- Authentication (FIXED) ---
             function checkLoginStatus() {
                 const loggedInUser = sessionStorage.getItem('loggedInUser');
                 if (loggedInUser) {
                     const user = JSON.parse(loggedInUser);
-                    showApp(user.role);
+                    currentUsername = user.username;
+                    currentUserRole = user.role;
+                    showApp();
                 } else {
                     showLogin();
                 }
@@ -764,25 +807,51 @@
                 loginError.classList.add('d-none');
                 const username = document.getElementById('username').value;
                 const password = document.getElementById('password').value;
-                const result = await gasRequest('login', { username, password });
-                if (result.success) {
-                    sessionStorage.setItem('loggedInUser', JSON.stringify({ username, role: result.role }));
-                    showApp(result.role);
-                } else {
-                    loginError.classList.remove('d-none');
+
+                // --- PERBAIKAN: Panggilan fetch() terpisah HANYA untuk login ---
+                loader.classList.remove('d-none');
+                try {
+                    const response = await fetch(GAS_URL, {
+                        method: 'POST',
+                        redirect: 'follow',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({ action: 'login', username: username, password: password })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        sessionStorage.setItem('loggedInUser', JSON.stringify({ username, role: result.role }));
+                        currentUsername = username;
+                        currentUserRole = result.role;
+                        showApp();
+                    } else {
+                        loginError.classList.remove('d-none');
+                    }
+                } catch (error) {
+                    console.error('Login Error:', error);
+                    alert('Gagal login. Periksa koneksi Anda.');
+                } finally {
+                    loader.classList.add('d-none');
                 }
+                // --- Akhir Perbaikan ---
             });
             
             logoutBtn.addEventListener('click', () => {
                 sessionStorage.removeItem('loggedInUser');
+                currentUsername = '';
+                currentUserRole = '';
                 showLogin();
             });
 
-            function showApp(role) {
+            function showApp() {
                 loginContainer.style.display = 'none';
                 appContainer.style.display = 'block';
-                userRoleDisplay.textContent = role.charAt(0).toUpperCase() + role.slice(1);
-                currentUserRole = role;
+                userRoleDisplay.textContent = currentUsername; // <-- PERBAIKAN DI SINI
                 fetchAndRenderAllData();
             }
             
@@ -872,8 +941,13 @@
                 }
                 
                 paginatedData.forEach((item, index) => {
-                    const row = document.createElement('tr');
-                    row.setAttribute('data-id', item.ID);
+                    const row = dataTableBody.insertRow();
+                    row.setAttribute('data-row-index', start + index);
+                    
+                    const hasId = item.ID && String(item.ID).trim() !== '';
+                    if (hasId) {
+                        row.setAttribute('data-id', item.ID);
+                    }
                     
                     let statusBadge;
                     switch (item.Status) {
@@ -882,21 +956,25 @@
                         case 'Ditolak': statusBadge = 'bg-danger'; break;
                         default: statusBadge = 'bg-secondary';
                     }
+
+                    row.insertCell().textContent = start + index + 1;
+                    row.insertCell().textContent = item['Nama Siswa'] || '';
+                    row.insertCell().textContent = item.NISN || '';
+                    row.insertCell().textContent = item['Nama Sekolah Asal'] || '';
+                    row.insertCell().textContent = item['Nama Sekolah Tujuan'] || '';
                     
-                    row.innerHTML = `
-                        <td>${start + index + 1}</td>
-                        <td>${item['Nama Siswa']}</td>
-                        <td>${item.NISN}</td>
-                        <td>${item['Nama Sekolah Asal']}</td>
-                        <td>${item['Nama Sekolah Tujuan']}</td>
-                        <td><span class="badge ${statusBadge}">${item.Status || 'N/A'}</span></td>
-                        <td>${item['Tanggal Usulan'] ? new Date(item['Tanggal Usulan']).toLocaleDateString('id-ID') : 'Invalid Date'}</td>
-                        <td>
-                            <button class="btn btn-sm btn-info text-white edit-btn" title="Edit"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-sm btn-danger delete-btn" title="Hapus"><i class="fas fa-trash"></i></button>
-                        </td>
+                    const statusCell = row.insertCell();
+                    statusCell.innerHTML = `<span class="badge ${statusBadge}">${item.Status || 'N/A'}</span>`;
+
+                    const dateCell = row.insertCell();
+                    const usulanDate = new Date(item['Tanggal Usulan']);
+                    dateCell.textContent = !isNaN(usulanDate.getTime()) ? usulanDate.toLocaleDateString('id-ID') : 'Invalid Date';
+                    
+                    const actionCell = row.insertCell();
+                    actionCell.innerHTML = `
+                        <button class="btn btn-sm btn-info text-white edit-btn" title="Edit" ${!hasId ? 'disabled' : ''}><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-sm btn-danger delete-btn" title="Hapus" ${!hasId ? 'disabled' : ''}><i class="fas fa-trash"></i></button>
                     `;
-                    dataTableBody.appendChild(row);
                 });
             }
 
@@ -907,10 +985,8 @@
                 if (pageCount <= 1) return;
                 
                 let paginationHTML = '<ul class="pagination">';
-                // Previous button
                 paginationHTML += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${currentPage - 1}">Sebelumnya</a></li>`;
                 
-                // Page numbers
                 const maxPagesToShow = 5;
                 let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
                 let endPage = Math.min(pageCount, startPage + maxPagesToShow - 1);
@@ -937,23 +1013,23 @@
                     paginationHTML += `<li class="page-item"><a class="page-link" href="#" data-page="${pageCount}">${pageCount}</a></li>`;
                 }
 
-
-                // Next button
                 paginationHTML += `<li class="page-item ${currentPage === pageCount ? 'disabled' : ''}"><a class="page-link" href="#" data-page="${currentPage + 1}">Berikutnya</a></li>`;
 
                 paginationHTML += '</ul>';
                 paginationEl.innerHTML = paginationHTML;
             }
 
-            // --- Filtering and Searching ---
+            // --- Filtering and Searching (FIXED) ---
             function applyFiltersAndRender() {
                 const searchTerm = searchInput.value.toLowerCase();
                 const statusFilter = filterStatus.value;
                 
                 filteredData = allData.filter(item => {
                     const matchesSearch = searchTerm === '' ||
-                        (item['Nama Siswa'] && item['Nama Siswa'].toLowerCase().includes(searchTerm)) ||
-                        (item.NISN && item.NISN.toLowerCase().includes(searchTerm));
+                        (item['Nama Siswa'] && String(item['Nama Siswa']).toLowerCase().includes(searchTerm)) ||
+                        (item.NISN && String(item.NISN).toLowerCase().includes(searchTerm)) ||
+                        (item['Nama Sekolah Asal'] && String(item['Nama Sekolah Asal']).toLowerCase().includes(searchTerm)) ||
+                        (item['Nama Sekolah Tujuan'] && String(item['Nama Sekolah Tujuan']).toLowerCase().includes(searchTerm));
                     const matchesStatus = statusFilter === '' || item.Status === statusFilter;
                     
                     return matchesSearch && matchesStatus;
@@ -967,20 +1043,48 @@
             searchInput.addEventListener('input', applyFiltersAndRender);
             filterStatus.addEventListener('change', applyFiltersAndRender);
             
-            // --- Event Delegation for table and pagination ---
+            // --- Event Delegation for table and pagination (FIXED) ---
             dataTableBody.addEventListener('click', (e) => {
-                const target = e.target.closest('button');
                 const row = e.target.closest('tr');
-                const id = row?.dataset.id;
-                
-                if (!id) return;
+                if (!row) return;
 
-                if (target?.classList.contains('edit-btn')) {
-                    handleEdit(id);
-                } else if (target?.classList.contains('delete-btn')) {
-                    handleDelete(id);
+                const rowIndex = row.dataset.rowIndex;
+                if (rowIndex === undefined) return;
+                
+                const item = filteredData[parseInt(rowIndex, 10)];
+                if (!item) return;
+
+                const targetButton = e.target.closest('button');
+
+                if (targetButton) {
+                    const id = item.ID || item.rowIndex; // Use ID if available, otherwise rowIndex
+                    if (!id) {
+                        // Jika tidak ada ID dan tombol (selain edit/delete) diklik, jangan lakukan apa-apa
+                        if(!targetButton.classList.contains('edit-btn') && !targetButton.classList.contains('delete-btn')) {
+                             return;
+                        }
+                    }
+                    
+                    // Izinkan admin mengedit/menghapus data lama (menggunakan rowIndex)
+                    if(currentUserRole === 'admin' && (targetButton.classList.contains('edit-btn') || targetButton.classList.contains('delete-btn'))) {
+                         if (targetButton.classList.contains('edit-btn')) {
+                            handleEdit(id);
+                        } else if (targetButton.classList.contains('delete-btn')) {
+                            handleDelete(id);
+                        }
+                        return;
+                    }
+                    
+                    // Untuk user biasa, tombol harus enabled (artinya punya ID)
+                    if (targetButton.disabled) return;
+                    
+                    if (targetButton.classList.contains('edit-btn')) {
+                        handleEdit(id);
+                    } else if (targetButton.classList.contains('delete-btn')) {
+                        handleDelete(id);
+                    }
                 } else {
-                    showDetailModal(id);
+                    showDetailModal(item);
                 }
             });
             
@@ -1008,7 +1112,7 @@
             });
 
 
-            // --- CRUD Operations ---
+            // --- CRUD Operations (FIXED) ---
             addNewBtn.addEventListener('click', () => {
                 dataForm.reset();
                 document.getElementById('usulan-id').value = '';
@@ -1079,6 +1183,12 @@
                     'Tanggal surat rekomendasi sekolah asal': document.getElementById('tanggal-surat-asal').value,
                     'Alasan Mutasi': document.getElementById('alasan-mutasi').value,
                     'Tanggal Usulan': document.getElementById('tanggal-usulan').value,
+                    // --- PERBAIKAN: Menambahkan kolom yang hilang ---
+                    'Nomor surat rekomendasi sekolah tujuan': document.getElementById('nomor-surat-tujuan').value,
+                    'Nomor surat rekomendasi sekolah asal': document.getElementById('nomor-surat-asal').value,
+                    'Bulan Surat Mutasi': document.getElementById('bulan-surat-mutasi').value,
+                    'Bulan Romawi': document.getElementById('bulan-romawi').value,
+                    'Tahun Surat Mutasi': document.getElementById('tahun-surat-mutasi').value
                 };
 
 
@@ -1119,13 +1229,13 @@
             });
 
             function handleEdit(id) {
-                const item = allData.find(d => String(d.ID) == id);
+                const item = allData.find(d => String(d.ID) == id || String(d.rowIndex) == id);
                 if (!item) return;
                 
                 dataForm.reset();
                 
                 // Populate form fields
-                document.getElementById('usulan-id').value = item.ID;
+                document.getElementById('usulan-id').value = id; // Use the identifier passed to the function
                 document.getElementById('jenjang').value = item['Jenjang'] || '';
                 document.getElementById('nama-siswa').value = item['Nama Siswa'] || '';
                 document.getElementById('nik-siswa').value = item['NIK Siswa'] || '';
@@ -1158,7 +1268,14 @@
                 document.getElementById('tanggal-surat-asal').value = item['Tanggal surat rekomendasi sekolah asal'] ? new Date(item['Tanggal surat rekomendasi sekolah asal']).toISOString().split('T')[0] : '';
                 document.getElementById('alasan-mutasi').value = item['Alasan Mutasi'] || '';
                 
-                document.getElementById('status').value = item.Status;
+                // --- PERBAIKAN: Mengisi data yang hilang ---
+                document.getElementById('nomor-surat-tujuan').value = item['Nomor surat rekomendasi sekolah tujuan'] || '';
+                document.getElementById('nomor-surat-asal').value = item['Nomor surat rekomendasi sekolah asal'] || '';
+                document.getElementById('bulan-surat-mutasi').value = item['Bulan Surat Mutasi'] || '';
+                document.getElementById('bulan-romawi').value = item['Bulan Romawi'] || '';
+                document.getElementById('tahun-surat-mutasi').value = item['Tahun Surat Mutasi'] || '';
+
+                document.getElementById('status').value = item.Status || 'Pending';
                 document.getElementById('tanggal-usulan').value = item['Tanggal Usulan'] ? new Date(item['Tanggal Usulan']).toISOString().split('T')[0] : '';
                 document.getElementById('catatan').value = item.Catatan || '';
                 
@@ -1209,10 +1326,9 @@
             // --- Detail Modal & Verification ---
             async function handleSaveVerification(e) {
                 const id = e.currentTarget.dataset.id;
-                const originalItem = allData.find(d => String(d.ID) == id);
+                const originalItem = allData.find(d => String(d.ID) == id || String(d.rowIndex) == id);
                 if (!originalItem) return;
 
-                // Create a full data object for the update
                 const dataToUpdate = { ...originalItem }; 
                 dataToUpdate['Status'] = document.getElementById('detail-status-update').value;
                 dataToUpdate['Catatan'] = document.getElementById('detail-catatan-update').value;
@@ -1227,10 +1343,9 @@
                 }
             }
 
-            function showDetailModal(id) {
-                const item = allData.find(d => String(d.ID) == id);
+            function showDetailModal(item) { // Takes item object
                 if (!item) {
-                     console.error("Item not found for ID:", id);
+                     console.error("Item not found");
                      alert("Data detail tidak ditemukan.");
                      return;
                 }
@@ -1327,6 +1442,9 @@
                 `;
                 
                 let adminVerificationSection = '';
+                const hasId = item.ID && String(item.ID).trim() !== '';
+                const identifier = hasId ? item.ID : item.rowIndex;
+
                 if (currentUserRole === 'admin') {
                     adminVerificationSection = `
                         <hr class="my-4">
@@ -1347,7 +1465,7 @@
                                  </div>
                             </div>
                              <div class="text-end mt-3">
-                                <button class="btn btn-primary" id="save-verification-btn" data-id="${id}"><i class="fas fa-save me-2"></i>Simpan Verifikasi</button>
+                                <button class="btn btn-primary" id="save-verification-btn" data-id="${identifier}"><i class="fas fa-save me-2"></i>Simpan Verifikasi</button>
                             </div>
                         </div>
                     `;
@@ -1355,10 +1473,11 @@
 
                 document.getElementById('detail-modal-body').innerHTML = detailBody + adminVerificationSection;
 
+
                 const detailFooter = `
                     <div class="modal-footer-actions">
                          <div class="btn-group">
-                            <button type="button" class="btn btn-warning create-doc-btn" data-id="${item.ID}">
+                            <button type="button" class="btn btn-warning create-doc-btn" data-id="${identifier}" ${!hasId ? 'disabled' : ''}>
                                 <i class="fas fa-print me-1"></i> Buat Surat
                             </button>
                             ${item['ID Surat Rekomendasi'] ? `
@@ -1366,13 +1485,13 @@
                                 <i class="fas fa-eye me-1"></i> Lihat Surat
                             </button>
                             ` : ''}
-                            <button type="button" class="btn btn-success view-docs-btn" data-id="${item.ID}">
+                            <button type="button" class="btn btn-success view-docs-btn">
                                 <i class="fas fa-folder-open me-1"></i> Dokumen Pendukung
                             </button>
                          </div>
                          <div>
                             <button type="button" class="btn btn-outline-secondary me-2" data-bs-dismiss="modal">Tutup</button>
-                            <button type="button" class="btn btn-info text-white edit-from-detail-btn" data-id="${item.ID}">
+                            <button type="button" class="btn btn-info text-white edit-from-detail-btn" data-id="${identifier}">
                                 <i class="fas fa-edit me-1"></i> Edit
                             </button>
                         </div>
@@ -1388,7 +1507,7 @@
                 });
 
                 document.querySelector('.view-docs-btn').addEventListener('click', (e) => {
-                    showDocumentViewer(e.currentTarget.dataset.id);
+                     showDocumentViewer(item);
                 });
                 
                 const viewRecommendationBtn = document.querySelector('.view-recommendation-btn');
@@ -1400,6 +1519,7 @@
                 }
 
                 document.querySelector('.create-doc-btn').addEventListener('click', async (e) => {
+                    if (e.currentTarget.disabled) return;
                     const id = e.currentTarget.dataset.id;
                     if(confirm('Apakah Anda yakin ingin membuat surat rekomendasi untuk siswa ini?')) {
                         const result = await gasRequest('createDocument', { id });
@@ -1422,8 +1542,7 @@
                 detailModal.show();
             }
 
-            function showDocumentViewer(id) {
-                const item = allData.find(d => String(d.ID) == id);
+            function showDocumentViewer(item) { // Now takes item object
                 if (!item) return;
 
                 const viewerBody = document.getElementById('document-viewer-body');
